@@ -8,13 +8,14 @@ import open3d as o3d
 import matplotlib
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import os
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('main')
 
 if __name__ == '__main__':
     # Create the sim_env
-    env = RobotacSimEnv('grasp', [0, 0.85, 0.3], 'robotac_sim/descriptions/ycb_objects/YcbBanana/model.urdf', [0, 0.425, 0.1], [0, 0, 0], freq=240, show_gui=True)
+    env = RobotacSimEnv('robotac_sim/descriptions/ycb_objects/YcbBanana_1/model.urdf', show_gui=True)
     log.info('Setting up RoboTac Sim')
     env.reset()
     viz = ObjectStateVisualiser(env)
