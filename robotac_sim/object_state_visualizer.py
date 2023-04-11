@@ -114,6 +114,6 @@ class ObjectStateVisualiser:
 
 
         # on macOS, calling processEvents() is unnecessary
-        # and even results in an error. only do so on Linux
+        # and even results in an error. only do so on Linux and Linux
         if platform.system() == 'Linux' or platform.system() == 'Windows':
             self.app.processEvents()

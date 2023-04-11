@@ -27,7 +27,7 @@ object = 'YcbChipsCan'  # Fill among YcbMustardBottle, YcbBanana, YcbHammer, Ycb
 variation = '1'  # Fill among 1, 2, 3
 
 object_model = os.path.join(object_models_path, '_'.join([object, variation]), 'model.urdf')
-env = RobotacSimEnv(object_model, show_gui=True)
+env = RobotacSimEnv(object_model, show_gui=False)
 # Reset the environment
 env.reset()
 assert env.robot.initialized

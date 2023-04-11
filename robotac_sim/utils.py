@@ -2,7 +2,6 @@ import pybullet as p
 import numpy as np
 import math
 import copy
-import cv2
 
 
 def plane_seg(point_cloud):
@@ -392,17 +391,6 @@ def transform_points(pts, transform):
     # trasform: [3x4]
     pts_t = np.dot(transform[0:3, 0:3], pts) + np.tile(transform[0:3, 3:], (1, pts.shape[1]))
     return pts_t
-
-
-def get_mask(image_ini, image_RGB):
-    h_ini, _, _ = cv2.split(cv2.cvtColor(image_ini, cv2.COLOR_RGB2HSV))
-    h_cur, _, _ = cv2.split(cv2.cvtColor(image_RGB, cv2.COLOR_RGB2HSV))
-    tmp = np.abs(h_ini - h_cur)
-    tmp = np.minimum(tmp, 360 - tmp)
-
-    mask = (tmp > 30).astype(np.int)
-    mask[:, :150] = 0
-    return mask
 
 
 def get_length(vec):

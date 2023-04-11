@@ -15,20 +15,20 @@ log = logging.getLogger('main')
 
 if __name__ == '__main__':
     # Create the sim_env
-    env = RobotacSimEnv('robotac_sim/descriptions/ycb_objects/YcbBanana_1/model.urdf', show_gui=True)
+    env = RobotacSimEnv('robotac_sim/descriptions/ycb_objects/YcbBanana_1/model.urdf', show_gui=False)
     log.info('Setting up RoboTac Sim')
     env.reset()
     viz = ObjectStateVisualiser(env)
     log.info('Setting up Vizualizer')
     assert env.robot.initialized
     env.p.stepSimulation()
-    time.sleep(2)
+    #time.sleep(2)
     log.info('Simulation Setup Done')
     env.close()
     print('Open3D version: ', o3d.__version__)
     random_noise = np.random.uniform(0, 5, 100)
     plt.plot(random_noise, '.r')
-    time.sleep(1)
+    #time.sleep(1)
     plt.close()
     print('Matplotlib version: ', matplotlib.__version__)
     print('Tensorflow version installed: ', tf.__version__)

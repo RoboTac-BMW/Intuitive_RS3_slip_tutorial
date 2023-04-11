@@ -2,7 +2,6 @@ tensorflow
 gym==0.26.2
 matplotlib==3.5.3
 open3d==0.17.0
-opencv-python==4.3.0.36
 Pillow==9.4.0
 pybullet==3.2.5
 pyqtgraph==0.12.4

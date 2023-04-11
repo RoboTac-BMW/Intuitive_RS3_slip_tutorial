@@ -3,14 +3,14 @@ Code base for the Intuitive RS3 ML-based slip detection tutorial
 
 # Requirements
 Ubuntu 18.04/20.04
- - Python >==3.6.9 
+ - Python == 3.6.9 
 
 Windows 10 
  - Python == 3.7.7
  - Microsoft Visual Studio Build Tools, follow the tutorial from #3 - https://deepakjogi.medium.com/how-to-install-pybullet-physics-simulation-in-windows-e1f16baa26f6
  
 MacOS
-- Python >=3.6.9
+- Python == 3.7.7
 
 # Installation
 - Install PyCharm Community Edition IDE
