@@ -4,6 +4,113 @@ import math
 import copy
 import cv2
 
+
+def plane_seg(point_cloud):
+    plane_model, inliers = point_cloud.segment_plane(distance_threshold=0.009,
+                                                            ransac_n=3,
+                                                            num_iterations=1000)
+    [a, b, c, d] = plane_model
+    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+    inlier_cloud = point_cloud.select_by_index(inliers)
+    inlier_cloud.paint_uniform_color([1.0, 0, 0])
+    outlier_cloud = point_cloud.select_by_index(inliers, invert=True)
+    inlier_cloud.paint_uniform_color([0.0, 0, 1.0])
+    return inlier_cloud, outlier_cloud
+
+
+def compute_object_rotation(rotm):
+    euler_ang = rotm2euler(rotm)
+    object_orn = [0, 0, euler_ang[2] - np.sign(euler_ang[2]) * math.pi / 2]
+    return object_orn
+
+
+def read_parameters(dbg_params):
+    '''Reads values from debug parameters
+
+    Parameters
+    ----------
+    dbg_params : dict
+        Dictionary where the keys are names (str) of parameters and the values are
+        the itemUniqueId (int) for the corresponing debug item in pybullet
+
+    Returns
+    -------
+    dict
+        Dictionary that maps parameter names (str) to parameter values (float)
+    '''
+    values = dict()
+    for name, param in dbg_params.items():
+        values[name] = p.readUserDebugParameter(param)
+
+    return values
+
+
+def interactive_camera_placement(camera_id, pos_scale=1.,
+                                 max_dist=2.,
+                                 show_plot=False,
+                                 verbose=False,
+                                 ):
+    '''GUI for adjusting camera placement in pybullet. Use the scales to adjust
+    intuitive parameters that govern view and projection matrix.  When you are
+    satisfied, you can hit the print button and the values needed to recreate
+    the camera placement will be logged to console.
+    In addition to showing a live feed of the camera, there are also two visual
+    aids placed in the simulator to help understand camera placement: the target
+    position and the camera. These are both shown as red objects and can be
+    viewed using the standard controls provided by the GUI.
+    Note
+    ----
+    There must be a simulator running in GUI mode for this to work
+    Parameters
+    ----------
+    pos_scale : float
+        Position scaling that limits the target position of the camera.
+    max_dist : float
+        Maximum distance the camera can be away from the target position, you
+        may need to adjust if you scene is large
+    show_plot : bool, default to True
+        If True, then a matplotlib window will be used to plot the generated
+        image.  This is beneficial if you want different values for image width
+        and height (since the built in image visualizer in pybullet is always
+        square).
+    verbose : bool, default to False
+        If True, then additional parameters will be printed when print button
+        is pressed.
+    '''
+    np.set_printoptions(suppress=True, precision=4)
+
+    dbg = dict()
+    # for view matrix
+    dbg['camera_x'] = p.addUserDebugParameter('camera_x', -pos_scale, pos_scale, 0)
+    dbg['camera_y'] = p.addUserDebugParameter('camera_y', -pos_scale, pos_scale, 0.85)
+    dbg['camera_z'] = p.addUserDebugParameter('camera_z', -pos_scale, pos_scale, 0.3)
+
+    dbg['print'] = p.addUserDebugParameter('print params', 1, 0, 1)
+    old_print_val = 1
+    while True:
+        values = read_parameters(dbg)
+        eye_pos = np.array([values[f'camera_{c}'] for c in 'xyz'])
+        view_mtx = p.computeViewMatrix(cameraEyePosition=eye_pos,
+                                                     cameraTargetPosition=[0, 0.3, 0.0],
+                                                     cameraUpVector=[0, -1, 0])
+        aspect = 480 / 480
+        proj_mtx = p.computeProjectionMatrixFOV(90,
+                                                 aspect,
+                                                 0.01,
+                                                 2)
+
+        # update visual aid for camera
+        view_mtx = np.array(view_mtx).reshape((4, 4), order='F')
+        T_world_cam = np.linalg.inv(view_mtx)
+        cam_orn = p.getQuaternionFromEuler(rotm2euler(T_world_cam[:3, :3]).tolist())
+        cam_pos = T_world_cam[:3, 3]
+        p.resetBasePositionAndOrientation(camera_id, cam_pos, cam_orn)
+        view_mtx = view_mtx.reshape(-1, order='F')
+        img = p.getCameraImage(480, 480, view_mtx, proj_mtx)[2]
+        if old_print_val != values['print']:
+            old_print_val = values['print']
+            print("[x, y, z]: ", eye_pos)
+
 # Get rotation matrix from euler angles
 def euler2rotm(theta):
     R_x = np.array([[1, 0, 0],

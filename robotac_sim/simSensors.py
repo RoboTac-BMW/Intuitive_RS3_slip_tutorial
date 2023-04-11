@@ -1,7 +1,7 @@
 import pybullet as p
 import numpy as np
 from collections import deque
-from robotac_sim.utils import changeFrame
+from robotac_sim.utils import changeFrame, rotm2euler
 
 
 class simCam(object):
@@ -18,7 +18,21 @@ class simCam(object):
         self.cid = cid
         self.p = physics_id
         self.name = 'azure_kinect'
-        self.camera_home_pos = camera_pos
+        self.cameraEyePosition = camera_pos
+        self.cameraHomePosition = camera_pos
+        self.cameraTargetPosition = [0, 0.3, 0.0]  # center of the RoboTac table
+        self.cameraUpVector = [0, -1, 0]
+        self.camera_id = None
+
+    def load(self):
+        viewMatrix_camera = self.p.computeViewMatrix(cameraEyePosition=self.cameraEyePosition, cameraTargetPosition=self.cameraTargetPosition, cameraUpVector=self.cameraUpVector)
+        viewMatrix_camera = np.array(viewMatrix_camera).reshape((4, 4), order='F')
+        T_world_cam = np.linalg.inv(viewMatrix_camera)
+        cam_orn = self.p.getQuaternionFromEuler(rotm2euler(T_world_cam[:3, :3]).tolist())
+        cam_pos = T_world_cam[:3, 3]
+        if self.camera_id == None:
+            self.camera_id = self.p.loadURDF('robotac_sim/descriptions/camera/azure.urdf', [0, 0, 0], useFixedBase=True)
+        self.p.resetBasePositionAndOrientation(self.camera_id, cam_pos, cam_orn)
 
     def set_position_from_gui(self):
         info = self.p.getDebugVisualizerCamera(physicsClientId=self.cid)
@@ -32,9 +46,10 @@ class simCam(object):
         return look_from, look_at
 
     def get_observation(self, cameraEyePosition=None):
-        self.cameraEyePosition = cameraEyePosition or self.camera_home_pos
-        self.cameraTargetPosition = [0, 0.3, 0]  # center of the RoboTac table
-        self.cameraUpVector = [0, -1, 0]
+        if cameraEyePosition != None:
+            self.cameraEyePosition = cameraEyePosition
+            self.load()
+
         self.viewMatrix = self.p.computeViewMatrix(cameraEyePosition=self.cameraEyePosition, cameraTargetPosition=self.cameraTargetPosition, cameraUpVector=self.cameraUpVector)
         self.projectionMatrix = self.p.computeProjectionMatrixFOV(fov=self.fov, aspect=self.aspect, nearVal=self.nearval, farVal=self.farval)
 

@@ -79,23 +79,23 @@ class simUR5:
         self.p.changeDynamics(self.robot_id,
                                 self.lnk2Idx_robot['robotiq_2f_85_right_follower'],
                                 lateralFriction=0.8,
-                                spinningFriction=0.5,
-                                rollingFriction=0.5)
+                                spinningFriction=0.05,
+                                rollingFriction=0.05)
         self.p.changeDynamics(self.robot_id,
                                 self.lnk2Idx_robot['robotiq_2f_85_left_follower'],
                                 lateralFriction=0.8,
-                                spinningFriction=0.5,
-                                rollingFriction=0.5)
+                                spinningFriction=0.05,
+                                rollingFriction=0.05)
         self.p.changeDynamics(self.robot_id,
                                 self.lnk2Idx_robot['robotiq_2f_85_right_pad'],
                                 lateralFriction=0.8,
-                                spinningFriction=0.5,
-                                rollingFriction=0.5)
+                                spinningFriction=0.05,
+                                rollingFriction=0.05)
         self.p.changeDynamics(self.robot_id,
                                 self.lnk2Idx_robot['robotiq_2f_85_left_pad'],
                                 lateralFriction=0.8,
-                                spinningFriction=0.5,
-                                rollingFriction=0.5)
+                                spinningFriction=0.05,
+                                rollingFriction=0.05)
 
     def reset(self):
         self.move_joints(self.ur5_initial_joint_positions, blocking=True, speed=1.0)

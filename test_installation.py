@@ -34,5 +34,5 @@ if __name__ == '__main__':
     print('GPU enabled: ', tf.test.is_gpu_available())
 
 
-
+    print("All test passed, Installation successful")
 

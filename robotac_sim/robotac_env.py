@@ -11,6 +11,7 @@ from robotac_sim.simRobot import simUR5
 from robotac_sim.simSensors import simCam, simTactile
 from robotac_sim.simObjects import simMovableObject
 import os
+import math
 
 # A logger for this file
 log = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ class RobotacSimEnv(gym.Env):
     """
     Superclass for PyBullet-based gym environments for Sim-RoboTac environment.
     """
-    def __init__(self, action_primitive, cam_position, object_model, object_pos, object_orn, freq=240, show_gui=False):
+    def __init__(self, object_model, object_pos=None, object_orn=None, action_primitive='grasp', cam_position=None, freq=240, show_gui=False):
 
         self.bullet_time_step = freq
         self.dt = 1/self.bullet_time_step
@@ -63,9 +64,15 @@ class RobotacSimEnv(gym.Env):
         self.show_gui = show_gui
         self.initialize_bullet()
 
+        # Default object locations
+        object_pos = object_pos or [0, 0.4+np.random.uniform(-0.02, -0.02), 0.1]
+        object_orn = object_orn or [0, 0, np.random.uniform(-math.pi/10, math.pi/10)]
+
+        # Default camera locations
+        self.cam_position = cam_position or [0, 0.85, 0.3]
         self.robot = simUR5(self.p, self.cid)
         self.object = simMovableObject(self.p, self.cid, object_model, initial_pos=object_pos, initial_orn=object_orn)
-        self.vision_sensor = simCam(self.p, self.cid, cam_position)
+        self.vision_sensor = simCam(self.p, self.cid, self.cam_position)
         self.tactile_sensor = simTactile(self.p, self.cid)
 
         self.load()
@@ -109,6 +116,9 @@ class RobotacSimEnv(gym.Env):
 
         # load the robot
         self.robot.load()
+
+        # load the kinect camera
+        self.vision_sensor.load()
 
         # load the object
         self.object.load()
@@ -178,7 +188,7 @@ class RobotacSimEnv(gym.Env):
         self.robot.reset()
         self.object.reset()
         self.p.stepSimulation(physicsClientId=self.cid)
-        self.p.resetDebugVisualizerCamera(cameraDistance=1.4, cameraYaw=228.4, cameraPitch=-19.4, cameraTargetPosition=[0.25, 0.08, 0.02])
+        self.p.resetDebugVisualizerCamera(cameraDistance=2, cameraYaw=228.4, cameraPitch=-19.4, cameraTargetPosition=[0.25, 0.08, 0.02])
 
         # Let the simulation settle up
         count = 500
