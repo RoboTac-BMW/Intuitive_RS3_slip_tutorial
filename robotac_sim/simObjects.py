@@ -11,8 +11,9 @@ class simMovableObject(object):
         self.cid = cid
         self.name = 'rect1'
         self.object_file = filename
-        self.initial_pos = initial_pos or np.array([0, 0, 0])
-        self.initial_orn = p.getQuaternionFromEuler(initial_orn) or np.array(p.getQuaternionFromEuler([0, 0, 0]))
+        self.initial_pos = initial_pos or [0, 0, 0]
+        self.initial_orn = initial_orn or [0, 0, 0]
+        self.initial_orn = p.getQuaternionFromEuler(self.initial_orn)
         self.euler_obs = True
 
     def load(self):

@@ -10,7 +10,6 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
-from scipy.spatial.transform import Rotation as R
 import math
 
 logging.basicConfig(level=logging.INFO)
@@ -140,7 +139,7 @@ for traj in trajectory:
     env.robot.update_gripper()
     env.robot.p.stepSimulation()
     # Obtain Visual observations of the scene
-    rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation()
+    # rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation()
 
     # Obtain G.T Object position and orientation
     pos, orn, lin_vel, ang_vel = env.object.get_observation()
