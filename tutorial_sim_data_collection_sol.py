@@ -27,7 +27,7 @@ object = 'YcbChipsCan'  # Fill among YcbMustardBottle, YcbBanana, YcbHammer, Ycb
 variation = '1'  # Fill among 1, 2, 3
 
 object_model = os.path.join(object_models_path, '_'.join([object, variation]), 'model.urdf')
-env = RobotacSimEnv(object_model, show_gui=False)
+env = RobotacSimEnv(object_model, show_gui=True)
 # Reset the environment
 env.reset()
 assert env.robot.initialized
@@ -49,7 +49,7 @@ visual_locations = [[0, 0.4, 0.3], [0, 0.85, 0.3], [-0.2, 0.3, 0.3], [0.2, 0.3, 
 
 def crop_pc(point_cloud):
     # TODO: crop the points outside the table (HINT: remember the dimension of the table and the location)
-    extent = [0.3, 0.3, 1.0]
+    extent = [0.35, 0.35, 0.5]
     center = [0, 0.4, 0]
 
     R = np.identity(3)
@@ -79,7 +79,7 @@ rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation(visual_location
 plane_pc, object_pc = plane_seg(point_cloud_merged)
 
 obb = o3d.geometry.OrientedBoundingBox.create_from_points(object_pc.points)
-o3d.visualization.draw([object_pc, obb])
+o3d.visualization.draw_geometries([object_pc, obb])
 
 # TODO: find the object center, orientation and the bounding box extent
 object_pos = obb.center
@@ -88,7 +88,7 @@ object_extent = obb.extent
 
 object_orn = compute_object_rotation(object_rotm)
 object_rotm_refined = euler2rotm(object_orn)
-# exit()
+
 
 # Attach Object State Visualizer
 viz = ObjectStateVisualiser(env)
@@ -98,7 +98,7 @@ tool_o_q = p.getQuaternionFromEuler(rotm2euler(tool_o_m).tolist())
 # ######################################### I. 5 Sample Grasp Point ####################################################
 object_length = np.max(object_extent)
 sampled_distance = np.random.uniform(-object_length / 3, object_length / 3)
-grasp_point_of = np.array([[0], [0.1], [0], [1]])
+grasp_point_of = np.array([[0], [sampled_distance], [0], [1]])
 object_trans_mat = np.array(
     [[object_rotm_refined[0, 0], object_rotm_refined[0, 1], object_rotm_refined[0, 2], object_pos[0]],
      [object_rotm_refined[1, 0], object_rotm_refined[1, 1], object_rotm_refined[1, 2], object_pos[1]],
@@ -106,7 +106,7 @@ object_trans_mat = np.array(
      [0, 0, 0, 1]])
 grasp_point_wf = np.matmul(object_trans_mat, grasp_point_of)
 
-# Start grasping procedure
+# ###################################### I. 6 Tune Grasp Force Value ###################################################
 log.info("Moving to pick-up location")
 env.robot.move_ee(position=[grasp_point_wf[0], grasp_point_wf[1], 0.15], orientation=tool_o_q, blocking=True, speed=0.01,
                   update_gripper=False)
@@ -114,11 +114,10 @@ env.robot.actuate_gripper(action='open', speed=0.7)
 env.robot.move_ee(position=[grasp_point_wf[0], grasp_point_wf[1], 0.025], orientation=tool_o_q, blocking=True, speed=0.01,
                   update_gripper=True)
 normal_force = 0
-force_threshold = 7
+force_threshold = 8
 env.robot.actuate_gripper(action='close', speed=0.1, force=100, timer_out=1)
 # Grasp till force threshold reached
 while abs(normal_force) < force_threshold:
-    print('Grabbing: ', normal_force)
     env.robot.update_gripper()
     env.robot.p.stepSimulation()
     force_x, force_y, force_z = env.tactile_sensor.get_observation(env.object.object_id)
@@ -132,6 +131,7 @@ lift_time = lift_distance/lift_speed
 wait_time = 1
 num_samples = lift_time*sim_freq
 
+# ###################################### I. 7 Tune Grasp Force Value ###################################################
 trajectory = np.arange(0.025, lift_distance+0.025, lift_speed/sim_freq)
 for traj in trajectory:
     # Execute action (position based joint control) - open loop/close loop
@@ -148,9 +148,9 @@ for traj in trajectory:
     force_x, force_y, force_z = env.tactile_sensor.get_observation(env.object.object_id)
 
     '''
-    if 0.1 < traj < 0.11:
+    if 0.2 < traj < 0.21:
         print('Apply external force')
-        p.applyExternalForce(env.object.object_id, -1, [0, 0, -5], [0, 0.1, 0], flags=p.LINK_FRAME)
+        p.applyExternalForce(env.object.object_id, -1, [0, 0, -4], [0, -0.1, 0], flags=p.LINK_FRAME)
         # p.applyExternalTorque(env.object.object_id, -1, [])
     '''
     if traj > 0.05:

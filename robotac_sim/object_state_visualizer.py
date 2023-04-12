@@ -18,7 +18,7 @@ class ObjectStateVisualiser:
         self.win = pg.GraphicsLayoutWidget(show=True, )
         self.win.resize(720, 480)
         self.win.setWindowTitle('Visualisation')
-
+        self.win.setBackground('w')
         # enable antialiasing for prettier plots
         pg.setConfigOptions(antialias=True)
 
@@ -38,15 +38,16 @@ class ObjectStateVisualiser:
 
 
         # Add plotters
-        self.fx = self.pl_fx.plot(pen='y')
-        self.fy = self.pl_fy.plot(pen='y')
-        self.fz = self.pl_fz.plot(pen='y')
-        self.slip = self.pl_slip.plot(pen='b')
+        self.fx = self.pl_fx.plot(pen='r')
+        self.fy = self.pl_fy.plot(pen='r')
+        self.fz = self.pl_fz.plot(pen='r')
+        self.slip = self.pl_slip.plot(pen='k')
+        self.slip_user = self.pl_slip.plot(pen='b')
 
-        self.pos_z = self.pl_pos_z.plot(pen='r')
-        self.orn_x = self.pl_orn_x.plot(pen='g')
-        self.vel_z = self.pl_vel_z.plot(pen='r')
-        self.omega_x = self.pl_omega_x.plot(pen='g')
+        self.pos_z = self.pl_pos_z.plot(pen='b')
+        self.orn_x = self.pl_orn_x.plot(pen='b')
+        self.vel_z = self.pl_vel_z.plot(pen='b')
+        self.omega_x = self.pl_omega_x.plot(pen='b')
 
 
         # buffers for plotted data
@@ -54,6 +55,7 @@ class ObjectStateVisualiser:
         self.b_fy = []
         self.b_fz = []
         self.b_slip = []
+        self.b_slip_user = []
 
         self.b_pos_z = []
         self.b_orn_x = []

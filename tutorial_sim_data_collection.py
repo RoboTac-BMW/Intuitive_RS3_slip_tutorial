@@ -1,17 +1,13 @@
 import os
 import time
 import pybullet as p
-import numpy as np
 from robotac_sim.robotac_env import RobotacSimEnv
 from robotac_sim.object_state_visualizer import ObjectStateVisualiser
 from robotac_sim.utils import interactive_camera_placement, euler2rotm, rotm2euler, compute_object_rotation, plane_seg
 import logging
-import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
-from scipy.spatial.transform import Rotation as R
-import math
 
 logging.basicConfig(level=logging.INFO)
 # A logger for this file
@@ -24,7 +20,7 @@ object_files = os.listdir(object_models_path)
 # Select a random object to be placed in the scene
 # object = np.random.choice(object_files) or
 # TODO: Fill in the object and the variation
-object = 'YcbChipsCan'  # Fill among YcbMustardBottle, YcbBanana, YcbHammer, YcbChipsCan
+object = 'YcbMustardBottle'  # Fill among YcbMustardBottle, YcbBanana, YcbHammer, YcbChipsCan
 variation = '1'  # Fill among 1, 2, 3
 
 object_model = os.path.join(object_models_path, '_'.join([object, variation]), 'model.urdf')
@@ -34,7 +30,7 @@ env.reset()
 assert env.robot.initialized
 rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation()
 
-time.sleep(1)
+time.sleep(10)
 exit()  # Comment once done with this section
 
 # ####################### I. 2 Find best camera locations to get shape and pose information  ###########################
@@ -100,8 +96,8 @@ tool_o_q = p.getQuaternionFromEuler(rotm2euler(tool_o_m).tolist())
 # ######################################### I. 5 Sample Grasp Point ####################################################
 object_length = np.max(object_extent)
 # TODO: sample a point in the local frame of the object
-sampled_distance = 0
-grasp_point_of = np.array([[0], [sampled_distance], [0], [1]])
+# grasp_point_of = np.array([[x], [y]])
+grasp_point_of = np.array([[], [], [0]])
 object_trans_mat = np.array(
     [[object_rotm_refined[0, 0], object_rotm_refined[0, 1], object_rotm_refined[0, 2], object_pos[0]],
      [object_rotm_refined[1, 0], object_rotm_refined[1, 1], object_rotm_refined[1, 2], object_pos[1]],
@@ -109,7 +105,7 @@ object_trans_mat = np.array(
      [0, 0, 0, 1]])
 grasp_point_wf = np.matmul(object_trans_mat, grasp_point_of)
 
-# Start grasping procedure
+# ###################################### I. 6 Tune Grasp Force Value ###################################################
 log.info("Moving to pick-up location")
 env.robot.move_ee(position=[grasp_point_wf[0], grasp_point_wf[1], 0.15], orientation=tool_o_q, blocking=True, speed=0.01,
                   update_gripper=False)
@@ -122,7 +118,6 @@ force_threshold = 0
 env.robot.actuate_gripper(action='close', speed=0.1, force=100, timer_out=1)
 # Grasp till force threshold reached
 while abs(normal_force) < force_threshold:
-    print('Grabbing: ', normal_force)
     env.robot.update_gripper()
     env.robot.p.stepSimulation()
     force_x, force_y, force_z = env.tactile_sensor.get_observation(env.object.object_id)
@@ -130,6 +125,7 @@ while abs(normal_force) < force_threshold:
 
 exit()
 time.sleep(1)
+
 # ########################### I. 6 Perform Object Grasping and Force Analysis ##########################################
 lift_speed = 0.2  # 0.1 m/sec
 lift_distance = 0.275
@@ -153,7 +149,8 @@ for traj in trajectory:
     force_x, force_y, force_z = env.tactile_sensor.get_observation(env.object.object_id)
 
     # TODO: check the force_x, force_y and force_y plots, can try a analytical slip detection approach
-    slip = force_y > 0.01
+    slip = []  # Analytical approach for slip detection
+    env.slip_user = slip
 
     if traj > 0.05:
         viz.start_detecting = True

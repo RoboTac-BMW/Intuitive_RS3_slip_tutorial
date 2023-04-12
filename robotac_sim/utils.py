@@ -5,7 +5,7 @@ import copy
 
 
 def plane_seg(point_cloud):
-    plane_model, inliers = point_cloud.segment_plane(distance_threshold=0.009,
+    plane_model, inliers = point_cloud.segment_plane(distance_threshold=0.008,
                                                             ransac_n=3,
                                                             num_iterations=1000)
     [a, b, c, d] = plane_model

@@ -169,7 +169,7 @@ class simTactile(object):
         self.force_x = []
         self.force_y = []
         self.force_z = []
-        self.force_smoothing = 1
+        self.force_smoothing = 10
         self.force_noise_mu = 0.0
         self.force_noise_sigma = 0.001
         self.force_threshold = 10
