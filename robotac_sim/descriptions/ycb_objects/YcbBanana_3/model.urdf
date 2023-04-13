@@ -2,8 +2,8 @@
 <robot name="model.urdf">
   <link name="baseLink">
     <contact>
-      <lateral_friction value="0.8"/>
-      <rolling_friction value="0.001"/>
+      <lateral_friction value="0.6"/>
+      <rolling_friction value="0.0009"/>
       <contact_cfm value="0.0"/>
       <contact_erp value="1.0"/>
     </contact>

@@ -112,7 +112,7 @@ class RobotacSimEnv(gym.Env):
         self.p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.p.loadURDF(os.path.join(pybullet_data.getDataPath(), "plane.urdf"))
         # load the table
-        self.p.loadURDF('robotac_sim/descriptions/scene_setup/robotac_table.urdf', basePosition=[0.0, 0.4, 0.0], useFixedBase=True)
+        self.robotac_table_id = self.p.loadURDF('robotac_sim/descriptions/scene_setup/robotac_table.urdf', basePosition=[0.0, 0.4, 0.0], useFixedBase=True)
 
         # load the robot
         self.robot.load()

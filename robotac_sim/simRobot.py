@@ -169,7 +169,7 @@ class simUR5:
                                                            upperLimits=self.robot_jointUpperLimit,
                                                            jointRanges=self.robot_jointRanges,
                                                            maxNumIterations=100,
-                                                           residualThreshold=1e-4)
+                                                           residualThreshold=1e-3)
         # Move joints
         self.move_joints(target_joint_config[:6], blocking, speed, update_gripper, timer_out)
 
