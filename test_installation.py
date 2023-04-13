@@ -16,9 +16,9 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('main')
 
 if __name__ == '__main__':
-    # Create the sim_env
-    log.info('Setting up RoboTac Sim')
     try:
+        # Create the sim_env
+        log.info('Setting up RoboTac Sim')
         env = RobotacSimEnv('robotac_sim/descriptions/ycb_objects/YcbBanana_1/model.urdf', show_gui=False)
         env.reset()
         viz = ObjectStateVisualiser(env)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         # time.sleep(1)
         plt.close()
         print('Matplotlib version: ', matplotlib.__version__)
-        print('Tensorflow version installed: ', tf.__version__)
+        print('Tensorflow version: ', tf.__version__)
         print('GPU enabled: ', tf.test.is_gpu_available())
         print("All test passed, Installation successful")
     except:

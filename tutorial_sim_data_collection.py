@@ -76,8 +76,8 @@ rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation(visual_location
 # TODO: segment the plane, Hint - pass the merged point cloud
 plane_pc, object_pc = plane_seg()
 # TODO: compute the orientedBoundingBox, Hint check open3d OrientedBoundingBox function
-obb = o3d.geometry.OrientedBoundingBox()
-o3d.visualization.draw_geometries([object_pc, obb])
+obb = o3d.geometry.OrientedBoundingBox.create_from_points(object_pc)
+o3d.visualization.draw([object_pc, obb])
 
 # TODO: find the object center, orientation and the bounding box extent
 object_pos = obb
