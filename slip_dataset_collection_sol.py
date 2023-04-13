@@ -186,7 +186,6 @@ if __name__ == '__main__':
             slip_label.append(int(slipped))
             object_label.append(object)
 
-
-db = {'forces': db_forces, 'slipping': db_slipping, 'slip_label': slip_label, 'object_label':object_label}
-with open('slip_database.pickle', 'wb') as f:
-    pickle.dump(db, f)
+        db = {'forces': db_forces, 'slipping': db_slipping, 'slip_label': slip_label, 'object_label':object_label}
+        with open('slip_database.pickle', 'wb') as f:
+            pickle.dump(db, f)
