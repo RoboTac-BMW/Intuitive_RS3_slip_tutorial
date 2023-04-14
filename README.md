@@ -26,4 +26,4 @@ MacOS
 -`tutorial_sim_slip_detection.py` - Part II tutorial for training the DL model
 
 # Dataset
-- Download the 'slip_database.pickle' from here - https://drive.google.com/file/d/1lubQyeWzDzlElCUEZJBHMsODiSh2vNai/view?usp=share_link
+- Download the 'slip_database.pickle' from [here](https://drive.google.com/file/d/1lubQyeWzDzlElCUEZJBHMsODiSh2vNai/view?usp=share_link)
