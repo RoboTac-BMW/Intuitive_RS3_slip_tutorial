@@ -1,5 +1,5 @@
 # Intuitive_RS3_slip_tutorial
-Code base for the Intuitive RS3 ML-based slip detection tutorial
+Code base for the Intuitive RS3 Slip Detection Tutorial in Robotics
 
 # Requirements
 Ubuntu 18.04/20.04
@@ -23,4 +23,7 @@ MacOS
 # Codes
 -`test_installation.py` - Run this to test your installation. In case of errors, please contact anirvan.dutta@bmwgroup.com or raise issue in Github \
 -`tutorial_sim_data_collection.py` - Part-I tutorial for running the data-collection pipeline
--`tutorial_slip_detection_train_test.py` - Part II tutorial for training the DL model
+-`tutorial_sim_slip_detection.py` - Part II tutorial for training the DL model
+
+# Dataset
+- Download the 'slip_database.pickle' from here - https://drive.google.com/file/d/1lubQyeWzDzlElCUEZJBHMsODiSh2vNai/view?usp=share_link
