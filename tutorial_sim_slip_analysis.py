@@ -30,7 +30,7 @@ env.reset()
 assert env.robot.initialized
 rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation()
 
-time.sleep(10)
+time.sleep(1)
 exit()  # Comment once done with this section
 
 # ####################### I. 2 Find best camera locations to get shape and pose information  ###########################
@@ -39,12 +39,9 @@ interactive_camera_placement(env.vision_sensor.camera_id) # Comment this line wh
 # visual_locations = [[x_1, y_1, z_1], [x_2, y_2, z_2], [x_3, y_3, z_3], [x_4, y_4, z_4]]
 visual_locations = []
 
-
 exit() # Comment once done with this section
 
 # ############ I. 3 Combine the RGB-D information as pointclouds from multiple visual locations  #######################
-
-
 def crop_pc(point_cloud):
     # TODO: crop the points outside the table (HINT: remember the dimension of the table and the location)
     extent = []
@@ -65,44 +62,44 @@ for loc in visual_locations:
     point_cloud.points = o3d.utility.Vector3dVector(bullet_xyz)
     cropped_point_cloud = point_cloud
     # TODO: crop the pointcloud
-    # cropped_point_cloud = crop_pc(cropped_point_cloud)
+    # cropped_point_cloud = crop_pc(point_cloud)
 
     o3d.visualization.draw_geometries([cropped_point_cloud])
     point_cloud_merged.points.extend(cropped_point_cloud.points)
     time.sleep(1)
-exit()
+
+exit() # Comment out this when done with this section
+
 rgb_img, depth_img, seg_mask = env.vision_sensor.get_observation(visual_locations[1])
 # ##################### I. 4 Remove the ground plane & find object position & orientation ##############################
-# TODO: segment the plane, Hint - pass the merged point cloud
+# TODO: segment the plane, Hint - pass the merged and cropped point cloud
 plane_pc, object_pc = plane_seg()
-# TODO: compute the orientedBoundingBox, Hint check open3d OrientedBoundingBox function
-obb = o3d.geometry.OrientedBoundingBox.create_from_points(object_pc)
+
+obb = o3d.geometry.OrientedBoundingBox.create_from_points(object_pc.points)
 o3d.visualization.draw([object_pc, obb])
 
-# TODO: find the object center, orientation and the bounding box extent
-object_pos = obb
-object_rotm = obb
-object_extent = obb
+object_pos = obb.center
+object_rotm = obb.R
+object_extent = obb.extent
 
 object_orn = compute_object_rotation(object_rotm)
-object_rotm_refined = euler2rotm(object_orn)
+object_orn_euler = euler2rotm(object_orn)
 exit()
 
 # Attach Object State Visualizer
 viz = ObjectStateVisualiser(env)
-tool_o_m = np.dot(object_rotm_refined, np.array(p.getMatrixFromQuaternion([0.7, 0.7, 0, 0])).reshape(3, 3))
+tool_o_m = np.dot(object_orn_euler, np.array(p.getMatrixFromQuaternion([0.7, 0.7, 0, 0])).reshape(3, 3))
 tool_o_q = p.getQuaternionFromEuler(rotm2euler(tool_o_m).tolist())
 
 # ######################################### I. 5 Sample Grasp Point ####################################################
 object_length = np.max(object_extent)
 # TODO: sample a point in the local frame of the object
 # grasp_point_of = np.array([[x], [y]])
-grasp_point_of = np.array([[], [], [0]])
+grasp_point_of = np.array([[], [], [1]])
 object_trans_mat = np.array(
-    [[object_rotm_refined[0, 0], object_rotm_refined[0, 1], object_rotm_refined[0, 2], object_pos[0]],
-     [object_rotm_refined[1, 0], object_rotm_refined[1, 1], object_rotm_refined[1, 2], object_pos[1]],
-     [object_rotm_refined[2, 0], object_rotm_refined[2, 1], object_rotm_refined[2, 2], 0],
-     [0, 0, 0, 1]])
+    [[object_orn_euler[0, 0], object_orn_euler[0, 1], object_pos[0]],
+     [object_orn_euler[1, 0], object_orn_euler[1, 1], object_pos[1]],
+     [0, 0, 1]])
 grasp_point_wf = np.matmul(object_trans_mat, grasp_point_of)
 
 # ###################################### I. 6 Tune Grasp Force Value ###################################################
@@ -114,7 +111,7 @@ env.robot.move_ee(position=[grasp_point_wf[0], grasp_point_wf[1], 0.025], orient
                   update_gripper=True)
 normal_force = 0
 # TODO: Fill in appropriate force threshold value
-force_threshold = 0
+force_threshold = 1
 env.robot.actuate_gripper(action='close', speed=0.1, force=100, timer_out=1)
 # Grasp till force threshold reached
 while abs(normal_force) < force_threshold:
@@ -123,7 +120,6 @@ while abs(normal_force) < force_threshold:
     force_x, force_y, force_z = env.tactile_sensor.get_observation(env.object.object_id)
     normal_force = force_y
 
-exit()
 time.sleep(1)
 
 # ########################### I. 6 Perform Object Grasping and Force Analysis ##########################################
